@@ -1,0 +1,23 @@
+name: Pull Request
+
+on:
+  pull_request:
+    tyeps: [ opened, synchronize, reopened ]
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    name: Detect Workspace Changes
+  set-labels:
+    runs-on: ubuntu-latest
+    name: Set PR Labels
+    needs: detect-changes
+    if: needs.detect-changes.outputs.changes == 'true'
+  validate-pr:
+    runs-on: ubuntu-latest
+    name: Validate Pull Request
