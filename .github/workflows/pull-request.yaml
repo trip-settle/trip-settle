@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read
 
 jobs:
   detect-changes:
@@ -16,6 +16,8 @@ jobs:
   set-labels:
     runs-on: ubuntu-latest
     name: Set PR Labels
+    permissions:
+      pull-requests: write
     needs: detect-changes
     if: needs.detect-changes.outputs.has-changes == 'true'
 
