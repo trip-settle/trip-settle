@@ -22,3 +22,7 @@ jobs:
   validate-pr:
     runs-on: ubuntu-latest
     name: Validate Pull Request
+    steps:
+      - name: Todo - implement validation
+        run: |
+          echo "Add checks here (e.g., title convention, required labels, file ownership, etc.)"
