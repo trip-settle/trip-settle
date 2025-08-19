@@ -31,11 +31,61 @@ jobs:
       - name: Detect workspace changes
         id: detect
         run: |
-          # TODO: Implement change detection logic
-          # Should output:
-          # - changed-workspaces: JSON array of workspaces names
-          # - has-changes: 'true' or 'false'
-          echo "TODO: Run node scripts/detect-changes.mjs"
+          set -euo pipefail
+          
+          echo "🔍 Detecting workspace changes..."
+          
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          
+          echo "Base SHA: $BASE_SHA"
+          echo "Head SHA: $HEAD_SHA"
+          
+          # Ensure base exists locally
+          git fetch --no-tags --prune --depth=1 origin "${BASE_SHA}" || true
+          
+          # Get all changed files, excluding empty lines
+          mapfile -t files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | sed '/^$/d')
+
+          echo "Files changed: ${#files[@]}"
+
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No changes detected"
+            echo 'changed-workspaces=[]' >> "$GITHUB_OUTPUT"
+            echo 'has-changes=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          
+          echo "Changed files:"
+          printf '  %s\n' "${files[@]}"
+
+          # Filter out common non-workspace directories and get top-level directories
+          changed="$(printf '%s\n' "${files[@]}" | \
+            grep -v '^\.github/' | \
+            grep -v '^\.vscode/' | \
+            grep -v '^docs/' | \
+            grep -v '^README' | \
+            grep -v '^LICENSE' | \
+            grep -v '^\.gitignore' | \
+            grep -v '^\.env' | \
+            grep -v '^package\.json$' | \
+            grep -v '^package-lock\.json$' | \
+            grep -v '^yarn\.lock$' | \
+            awk -F/ 'NF>1{print $1}' | \
+            sort -u | \
+            jq -R . | \
+            jq -s .)"
+
+          # Handle case where no workspaces are detected after filtering
+          if [ "$changed" = "[]" ] || [ -z "$changed" ]; then
+            echo "No workspace changes detected after filtering"
+            echo 'changed-workspaces=[]' >> "$GITHUB_OUTPUT"
+            echo 'has-changes=false' >> "$GITHUB_OUTPUT"
+          else
+            echo "Detected workspace changes: $changed"
+            echo "changed-workspaces=${changed}" >> "$GITHUB_OUTPUT"
+            echo 'has-changes=true' >> "$GITHUB_OUTPUT"
+          fi
 
   set-labels:
     runs-on: ubuntu-latest
