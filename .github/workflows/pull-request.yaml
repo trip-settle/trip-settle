@@ -13,6 +13,30 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     name: Detect Workspace Changes
+    outputs:
+      changed-workspaces: ${{ steps.detect.outputs.changed-workspaces }}
+      has-changes: ${{ steps.detect.outputs.has-changes }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+
+      - name: Detect workspace changes
+        id: detect
+        run: |
+          # TODO: Implement change detection logic
+          # Should output:
+          # - changed-workspaces: JSON array of workspaces names
+          # - has-changes: 'true' or 'false'
+          echo "TODO: Run node scripts/detect-changes.mjs"
+
   set-labels:
     runs-on: ubuntu-latest
     name: Set PR Labels
