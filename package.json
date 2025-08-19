@@ -1,0 +1,5 @@
+{
+  "name": "trip-settle",
+  "version": "0.0.0",
+  "workspaces": ["packages/*"]
+}
