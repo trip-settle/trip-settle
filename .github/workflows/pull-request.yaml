@@ -1,0 +1,107 @@
+name: Pull Request
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    name: Detect Workspace Changes
+    outputs:
+      changed-workspaces: ${{ steps.detect.outputs.changed-workspaces }}
+      has-changes: ${{ steps.detect.outputs.has-changes }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect workspace changes
+        id: detect
+        run: |
+          set -euo pipefail
+
+          echo "🔍 Detecting workspace changes..."
+
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          echo "Base SHA: $BASE_SHA"
+          echo "Head SHA: $HEAD_SHA"
+
+          # Ensure base exists locally
+          git fetch --no-tags --prune --depth=1 origin "${BASE_SHA}" || true
+
+          # Get all changed files, excluding empty lines
+          mapfile -t files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | sed '/^$/d')
+
+          echo "Files changed: ${#files[@]}"
+
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No changes detected"
+            echo 'changed-workspaces=[]' >> "$GITHUB_OUTPUT"
+            echo 'has-changes=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Changed files:"
+          printf '  %s\n' "${files[@]}"
+
+          # Filter out common non-workspace directories and get top-level directories
+          changed="$(
+            printf '%s\n' "${files[@]}" | awk -F/ '
+              # Exclude non-workspace paths
+              !/^\.github\// &&
+              !/^\.vscode\// &&
+              !/^docs\// &&
+              !/^README/ &&
+              !/^LICENSE/ &&
+              !/^\.(gitignore|env)$/ &&
+              !/^package\.json$/ &&
+              !/^package-lock\.json$/ &&
+              !/^yarn\.lock$/ {
+                if (NF > 1) { seen[$1] = 1 }
+              }
+              END {
+                for (k in seen) print k
+              }
+            ' | sort -u | jq -R -s 'split("\n") | map(select(length>0))'
+          )"
+
+          # Handle case where no workspaces are detected after filtering
+          if [ "$changed" = "[]" ] || [ -z "$changed" ]; then
+            echo "No workspace changes detected after filtering"
+            echo 'changed-workspaces=[]' >> "$GITHUB_OUTPUT"
+            echo 'has-changes=false' >> "$GITHUB_OUTPUT"
+          else
+            echo "Detected workspace changes: $changed"
+            echo "changed-workspaces=${changed}" >> "$GITHUB_OUTPUT"
+            echo 'has-changes=true' >> "$GITHUB_OUTPUT"
+          fi
+
+  set-labels:
+    runs-on: ubuntu-latest
+    name: Set PR Labels
+    permissions:
+      pull-requests: write
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    steps:
+      - name: Todo - implement set-labels
+        run: |
+          echo "Add labels here (e.g., 'breaking-change', 'feature', etc.)"
+
+  validate-pr:
+    runs-on: ubuntu-latest
+    name: Validate Pull Request
+    steps:
+      - name: Todo - implement validation
+        run: |
+          echo "Add checks here (e.g., title convention, required labels, file ownership, etc.)"
