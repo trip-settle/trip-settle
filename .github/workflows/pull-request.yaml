@@ -20,6 +20,10 @@ jobs:
       pull-requests: write
     needs: detect-changes
     if: needs.detect-changes.outputs.has-changes == 'true'
+    steps:
+      - name: Todo - implement set-labels
+        run: |
+          echo "Add labels here (e.g., 'breaking-change', 'feature', etc.)"
 
   validate-pr:
     runs-on: ubuntu-latest
