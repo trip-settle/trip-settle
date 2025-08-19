@@ -60,21 +60,25 @@ jobs:
           printf '  %s\n' "${files[@]}"
 
           # Filter out common non-workspace directories and get top-level directories
-          changed="$(printf '%s\n' "${files[@]}" | \
-            grep -v '^\.github/' | \
-            grep -v '^\.vscode/' | \
-            grep -v '^docs/' | \
-            grep -v '^README' | \
-            grep -v '^LICENSE' | \
-            grep -v '^\.gitignore' | \
-            grep -v '^\.env' | \
-            grep -v '^package\.json$' | \
-            grep -v '^package-lock\.json$' | \
-            grep -v '^yarn\.lock$' | \
-            awk -F/ 'NF>1{print $1}' | \
-            sort -u | \
-            jq -R . | \
-            jq -s .)"
+          changed="$(
+            printf '%s\n' "${files[@]}" | awk -F/ '
+              # Exclude non-workspace paths
+              !/^\.github\// &&
+              !/^\.vscode\// &&
+              !/^docs\// &&
+              !/^README/ &&
+              !/^LICENSE/ &&
+              !/^\.(gitignore|env)$/ &&
+              !/^package\.json$/ &&
+              !/^package-lock\.json$/ &&
+              !/^yarn\.lock$/ {
+                if (NF > 1) { seen[$1] = 1 }
+              }
+              END {
+                for (k in seen) print k
+              }
+            ' | sort -u | jq -R -s 'split("\n") | map(select(length>0))'
+          )"
 
           # Handle case where no workspaces are detected after filtering
           if [ "$changed" = "[]" ] || [ -z "$changed" ]; then
