@@ -54,35 +54,49 @@ jobs:
           echo "Changed files:"
           printf '  %s\n' "${files[@]}"
 
-          # Filter out common non-workspace directories and get top-level directories
-          changed="$(
-            printf '%s\n' "${files[@]}" | awk -F/ '
-              # Exclude non-workspace paths
-              !/^\.github\// &&
-              !/^\.vscode\// &&
-              !/^docs\// &&
-              !/^README/ &&
-              !/^LICENSE/ &&
-              !/^\.(gitignore|env)$/ &&
-              !/^package\.json$/ &&
-              !/^package-lock\.json$/ &&
-              !/^yarn\.lock$/ {
-                if (NF > 1) { seen[$1] = 1 }
-              }
-              END {
-                for (k in seen) print k
-              }
-            ' | sort -u | jq -R -s 'split("\n") | map(select(length>0))'
-          )"
+          # Get actual workspace names from packages directory
+          changed_workspaces=()
+          for file in "${files[@]}"; do
+            # Skip non-workspace files
+            if [[ "$file" =~ ^\.github/ ]] || \
+               [[ "$file" =~ ^\.vscode/ ]] || \
+               [[ "$file" =~ ^docs/ ]] || \
+               [[ "$file" =~ ^README ]] || \
+               [[ "$file" =~ ^LICENSE ]] || \
+               [[ "$file" =~ ^\.(gitignore|env)$ ]] || \
+               [[ "$file" == "package.json" ]] || \
+               [[ "$file" == "package-lock.json" ]] || \
+               [[ "$file" == "yarn.lock" ]]; then
+              continue
+            fi
+          
+            # Extract workspace name from packages/* paths
+            if [[ "$file" =~ ^packages/([^/]+)/ ]]; then
+              workspace="${BASH_REMATCH[1]}"
+              if [[ ! " ${changed_workspaces[*]} " =~ " ${workspace} " ]]; then
+                changed_workspaces+=("$workspace")
+              fi
+            fi
+          done
 
-          # Handle case where no workspaces are detected after filtering
-          if [ "$changed" = "[]" ] || [ -z "$changed" ]; then
+          # Convert to JSON array (single line)
+          if [ ${#changed_workspaces[@]} -eq 0 ]; then
             echo "No workspace changes detected after filtering"
             echo 'changed-workspaces=[]' >> "$GITHUB_OUTPUT"
             echo 'has-changes=false' >> "$GITHUB_OUTPUT"
           else
-            echo "Detected workspace changes: $changed"
-            echo "changed-workspaces=${changed}" >> "$GITHUB_OUTPUT"
+            # Create JSON array manually to ensure single line output
+            json_array="["
+            for i in "${!changed_workspaces[@]}"; do
+              if [ $i -gt 0 ]; then
+                json_array+=","
+              fi
+              json_array+="\"${changed_workspaces[i]}\""
+            done
+            json_array+="]"
+          
+            echo "Detected workspace changes: ${changed_workspaces[*]}"
+            echo "changed-workspaces=${json_array}" >> "$GITHUB_OUTPUT"
             echo 'has-changes=true' >> "$GITHUB_OUTPUT"
           fi
 
