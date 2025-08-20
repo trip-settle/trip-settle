@@ -16,6 +16,7 @@ jobs:
     outputs:
       changed-workspaces: ${{ steps.detect.outputs.changed-workspaces }}
       has-changes: ${{ steps.detect.outputs.has-changes }}
+      root-config-changed: ${{ steps.detect.outputs.root-config-changed }}
 
     steps:
       - name: Checkout repository
@@ -56,7 +57,19 @@ jobs:
 
           # Get actual workspace names from packages directory
           changed_workspaces=()
+          root_config_changed=false
+
+          # Check if root workspace config files changed
           for file in "${files[@]}"; do
+            case "$file" in
+              package.json|package-lock.json)
+                root_config_changed=true
+                ;;
+            esac
+          done
+          
+          # Process individual workspace changes
+          for file in "${files[@]]}"; do
             # Skip non-workspace files
             if [[ "$file" =~ ^\.github/ ]] || \
                [[ "$file" =~ ^\.vscode/ ]] || \
@@ -98,6 +111,7 @@ jobs:
             echo "Detected workspace changes: ${changed_workspaces[*]}"
             echo "changed-workspaces=${json_array}" >> "$GITHUB_OUTPUT"
             echo 'has-changes=true' >> "$GITHUB_OUTPUT"
+            echo "root-config-changed=${root_config_changed}" >> "$GITHUB_OUTPUT"
           fi
 
   set-labels:
