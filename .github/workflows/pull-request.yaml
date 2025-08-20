@@ -70,7 +70,7 @@ jobs:
           done
           
           # Process individual workspace changes
-          for file in "${files[@]]}"; do
+          for file in "${files[@]}"; do
             # Skip non-workspace files
             if [[ "$file" =~ ^\.github/ ]] || \
                [[ "$file" =~ ^\.vscode/ ]] || \
