@@ -135,3 +135,22 @@ jobs:
       - name: Todo - implement validation
         run: |
           echo "Add checks here (e.g., title convention, required labels, file ownership, etc.)"
+
+  validate-commit-messages:
+    runs-on: ubuntu-latest
+    name: Validate Commit Messages
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+          cache: npm
+
+      - name: Validate PR commit messages
+        run: node ./.github/workflows/scripts/validate-commit-messages.ts
