@@ -154,3 +154,7 @@ jobs:
 
       - name: Validate PR commit messages
         run: node ./.github/workflows/scripts/validate-commit-messages.ts
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
