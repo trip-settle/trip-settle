@@ -8,7 +8,7 @@
     "type": "git",
     "url": "git+https://github.com/trip-settle/trip-settle.git"
   },
-  "private": "true",
+  "private": true,
   "devDependencies": {
     "prettier": "^3.6.2"
   }
