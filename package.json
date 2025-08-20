@@ -1,0 +1,10 @@
+{
+  "name": "trip-settle",
+  "version": "0.0.0",
+  "workspaces": ["packages/*"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trip-settle/trip-settle.git"
+  },
+  "private": "true"
+}
