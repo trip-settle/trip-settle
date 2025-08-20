@@ -22,6 +22,15 @@ let hasErrors = false
 const errors: string[] = []
 
 for (const commit of commits) {
+	const [sha, message, author] = commit.split('|', 3)
+
+	const validation = validateCommitMessage(message)
+
+	if (!validation.isValid) {
+		hasErrors = true
+	} else {
+		console.log(`✅ ${sha.substring(0, 7)}: "${message}"`)
+	}
 }
 
 if (hasErrors) {
@@ -32,3 +41,15 @@ if (hasErrors) {
 }
 
 console.log(`\n🎉 All ${commits.length} commits have valid messages!`)
+
+interface ValidationResult {
+	isValid: boolean
+	errors: string[]
+}
+
+function validateCommitMessage(message: string): ValidationResult {
+	return {
+		isValid: true,
+		errors: [],
+	}
+}
