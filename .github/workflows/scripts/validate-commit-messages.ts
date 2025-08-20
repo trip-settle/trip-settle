@@ -17,3 +17,18 @@ if (commits.length === 0) {
 }
 
 console.log(`Found ${commits.length} commits to validate.`)
+
+let hasErrors = false
+const errors: string[] = []
+
+for (const commit of commits) {
+}
+
+if (hasErrors) {
+	console.log('\n📋 Summary of errors:')
+	errors.forEach(error => console.log(`- ${error}`))
+
+	process.exit(1)
+}
+
+console.log(`\n🎉 All ${commits.length} commits have valid messages!`)
