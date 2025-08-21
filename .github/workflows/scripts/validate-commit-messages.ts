@@ -55,6 +55,12 @@ for (const commit of commits) {
 	const validation = validateCommitMessage(message, config)
 
 	if (!validation.isValid) {
+		const shortSha = sha.substring(0, 7)
+		console.error(`❌ ${shortSha}: "${message}" by ${author}`)
+		validation.errors.forEach(error => {
+			console.error(`   - ${error}`)
+			errors.push(`${shortSha}: ${error}`)
+		})
 		hasErrors = true
 	} else {
 		console.log(`✅ ${sha.substring(0, 7)}: "${message}"`)
