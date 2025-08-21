@@ -132,5 +132,5 @@ allowed_keywords:
 breaking_changes:
   indicators: ["!", "BREAKING CHANGE:"]
   examples:
-    - "feat!: Foo bar"
+    - "feat(API)!: Foo bar"
     - "feat(API): Add user roles\n\nBREAKING CHANGE: removes support for legacy admin flag"
