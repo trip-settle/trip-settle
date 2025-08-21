@@ -42,6 +42,8 @@ jobs:
 
           # Get all changed files, excluding empty lines
           mapfile -t files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | sed '/^$/d')
+          
+          root_config_changed=false
 
           echo "Files changed: ${#files[@]}"
 
@@ -58,7 +60,6 @@ jobs:
 
           # Get actual workspace names from packages directory
           changed_workspaces=()
-          root_config_changed=false
 
           # Check if root workspace config files changed
           for file in "${files[@]}"; do
