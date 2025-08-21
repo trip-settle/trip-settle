@@ -85,7 +85,7 @@ allowed_keywords:
     scopes:
       README:
         description: "Main project documentation"
-      CONTRIBUTING:
+      Contribution:
         description: "Contribution guidelines"
       API:
         description: "API documentation and specifications"
@@ -93,9 +93,9 @@ allowed_keywords:
         description: "Inline code documentation"
     examples:
       - "docs(README): Clarify installation steps"
-      - "docs(CONTRIBUTING): Add guideline for @example usage in utility functions"
+      - "docs(Contribution): Add guideline for @example usage in utility functions"
       - "docs(API): Document setupSwagger with example usage"
-      - "docs(Examples): Add usage sample for toMarkdownList"
+      - "docs(JSDoc): Add usage sample for toMarkdownList"
       - "docs(JSDoc): Add param and example tags to bootstrap function"
 
   - name: test
