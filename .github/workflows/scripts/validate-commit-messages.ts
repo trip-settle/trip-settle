@@ -48,6 +48,14 @@ interface ValidationResult {
 }
 
 function validateCommitMessage(message: string): ValidationResult {
+	const commitRegex = /^([a-z]+)(\(([^)]+)\))?: [A-Z].+$/
+	const match = message.match(commitRegex)
+
+	if (!match) {
+		errors.push('Invalid format. Expected: "<type>(<scope>): <description>"')
+		return { isValid: false, errors }
+	}
+
 	return {
 		isValid: true,
 		errors: [],
