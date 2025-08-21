@@ -1,4 +1,25 @@
 import { execSync } from 'node:child_process'
+import { readFileSync } from 'fs'
+import { parse } from 'yaml'
+
+interface CommitRule {
+	name: string
+	description: string
+	requires_scope: boolean
+	scopes?: string[] | Record<string, { description: string }>
+	examples?: {
+		good?: Array<{ commit: string; explanation: string }>
+		bad?: Array<{ commit: string; explanation: string }>
+	}
+}
+
+interface CommitConfig {
+	allowed_keywords: CommitRule[]
+	breaking_changes: {
+		indicators: string[]
+		example: string[]
+	}
+}
 
 const { BASE_SHA: baseSha, HEAD_SHA: headSha, PR_NUMBER: prNumber } = process.env
 
@@ -50,6 +71,16 @@ console.log(`\n🎉 All ${commits.length} commits have valid messages!`)
 interface ValidationResult {
 	isValid: boolean
 	errors: string[]
+}
+
+function loadConfig(configPath: string = './commit-convetions.yaml'): CommitConfig {
+	try {
+		const yamlContent = readFileSync(configPath, 'utf8')
+		return parse(yamlContent) as CommitConfig
+	} catch (error) {
+		console.error(`❌ Failed to load config file: ${error}`)
+		process.exit(1)
+	}
 }
 
 function validateCommitMessage(message: string): ValidationResult {
