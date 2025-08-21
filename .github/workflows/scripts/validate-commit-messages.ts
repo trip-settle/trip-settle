@@ -47,10 +47,12 @@ console.log(`Found ${commits.length} commits to validate.`)
 let hasErrors = false
 const errors: string[] = []
 
+const config = loadConfig()
+
 for (const commit of commits) {
 	const [sha, message, author] = commit.split('|', 3)
 
-	const validation = validateCommitMessage(message)
+	const validation = validateCommitMessage(message, config)
 
 	if (!validation.isValid) {
 		hasErrors = true
@@ -83,13 +85,44 @@ function loadConfig(configPath: string = './commit-convetions.yaml'): CommitConf
 	}
 }
 
-function validateCommitMessage(message: string): ValidationResult {
+function validateCommitMessage(message: string, config: CommitConfig): ValidationResult {
 	const commitRegex = /^([a-z]+)(\(([^)]+)\))?: [A-Z].+$/
 	const match = message.match(commitRegex)
 
 	if (!match) {
 		errors.push('Invalid format. Expected: "<type>(<scope>): <description>"')
 		return { isValid: false, errors }
+	}
+
+	const [, type, , scope, description] = match
+
+	// Check if type is allowed
+	const allowedRule = config.allowed_keywords.find(rule => rule.name === type)
+	if (!allowedRule) {
+		const allowedTypes = config.allowed_keywords.map(rule => rule.name).join(', ')
+		errors.push(`Invalid type '${type}'. Allowed types: ${allowedTypes}`)
+		return { isValid: false, errors }
+	}
+
+	// Check scope requirement
+	if (allowedRule.requires_scope && !scope) {
+		errors.push(`Type '${type}' requires a scope`)
+	}
+
+	// Check if scope is valid (if provided and rule has defined scopes)
+	if (scope && allowedRule.scopes) {
+		let validScopes: string[] = []
+
+		// Todo Scope 가 배열에서 키로 모두 바뀌면 수정
+		if (Array.isArray(allowedRule.scopes)) {
+			validScopes = allowedRule.scopes
+		} else {
+			validScopes = Object.keys(allowedRule.scopes)
+		}
+
+		if (validScopes.length > 0 && !validScopes.includes(scope)) {
+			errors.push(`Invalid scope '${scope}' for type '${type}'. Allowed scopes: ${validScopes.join(', ')}`)
+		}
 	}
 
 	return {
