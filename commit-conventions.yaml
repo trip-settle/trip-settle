@@ -4,53 +4,53 @@ allowed_keywords:
     requires_scope: true
     scopes:
       App:
-        description: "Backend server-side changes (App for Web Application Server)"
+        description: 'Backend server-side changes (App for Web Application Server)'
       Config:
-        description: "Configuration file changes"
+        description: 'Configuration file changes'
       Database:
-        description: "Database schema, queries, or connection changes"
+        description: 'Database schema, queries, or connection changes'
     examples:
       good:
-        - commit: "feat(Config): Add dynamic environment variable loading"
-          explanation: "Clear feature addition with specific scope"
+        - commit: 'feat(Config): Add dynamic environment variable loading'
+          explanation: 'Clear feature addition with specific scope'
       bad:
-        - commit: "feat(Config): Update config.json file"
-          explanation: "Mentions file name instead of what functionality was added"
-        - commit: "feat(App): Fix bug in user service"
-          explanation: "Wrong type - this is a fix, not a feature"
+        - commit: 'feat(Config): Update config.json file'
+          explanation: 'Mentions file name instead of what functionality was added'
+        - commit: 'feat(App): Fix bug in user service'
+          explanation: 'Wrong type - this is a fix, not a feature'
 
   - name: fix
     description: Fix a bug.
     requires_scope: true
-    scopes: [ Database, Code ]
+    scopes: [Database, Code]
     examples:
       good:
-        - commit: "fix(Database): Resolve connection timeout issue"
-          explanation: "Bug fix with affected component identified"
+        - commit: 'fix(Database): Resolve connection timeout issue'
+          explanation: 'Bug fix with affected component identified'
       bad:
-        - commit: "fix(App): Update UserService.ts and add new method"
-          explanation: "Mentions file name and sounds like a feature, not a bug fix"
-        - commit: "fix(Database): Improve query performance"
-          explanation: "Performance improvement should be refactor(Performance)"
+        - commit: 'fix(App): Update UserService.ts and add new method'
+          explanation: 'Mentions file name and sounds like a feature, not a bug fix'
+        - commit: 'fix(Database): Improve query performance'
+          explanation: 'Performance improvement should be refactor(Performance)'
 
   - name: refactor
     description: Improve existing code without changing functionality.
     requires_scope: true
     scopes:
-      - Performance     # For changes that optimize speed or resource usage.
-      - Modularity      # For changes that improve structure/separation of concerns.
-      - Readability     # When refactoring to improve clarity.
+      - Performance # For changes that optimize speed or resource usage.
+      - Modularity # For changes that improve structure/separation of concerns.
+      - Readability # When refactoring to improve clarity.
       - Maintainability # For improvements that simplify future maintenance.
     examples:
       good:
-        - commit: "refactor(Performance): Remove unnecessary validation logic"
-          explanation: "Clear performance improvement without functionality change"
-        - commit: "refactor(Maintainability): Introduce FindDockerfilesDto to clarify the read response structure"
+        - commit: 'refactor(Performance): Remove unnecessary validation logic'
+          explanation: 'Clear performance improvement without functionality change'
+        - commit: 'refactor(Maintainability): Introduce FindDockerfilesDto to clarify the read response structure'
       bad:
-        - commit: "refactor(Performance): Update database.service.ts"
-          explanation: "Mentions file name instead of describing performance improvement"
-        - commit: "refactor(Modularity): Add new payment feature"
-          explanation: "Adding new feature should be feat(), not refactor()"
+        - commit: 'refactor(Performance): Update database.service.ts'
+          explanation: 'Mentions file name instead of describing performance improvement'
+        - commit: 'refactor(Modularity): Add new payment feature'
+          explanation: 'Adding new feature should be feat(), not refactor()'
 
   - name: chore
     description: General maintenance tasks (e.g., dependencies, configs)
@@ -59,78 +59,78 @@ allowed_keywords:
       - Dependencies
       - Config
       - gitignore
-      - Script          # When changing scripts in package.json
+      - Script # When changing scripts in package.json
       - Lint
       - GitHub
     examples:
       good:
-        - commit: "chore(Dependencies): Bump TypeScript version"
-          explanation: "Clear dependency update"
+        - commit: 'chore(Dependencies): Bump TypeScript version'
+          explanation: 'Clear dependency update'
       bad:
-        - commit: "chore(Dependencies): Fix critical security vulnerability"
-          explanation: "Fixes should be fix(), not chore()"
-        - commit: "chore(Config): Update .eslint.json file"
-          explanation: "Mentions file name instead of describing what configuration changed"
+        - commit: 'chore(Dependencies): Fix critical security vulnerability'
+          explanation: 'Fixes should be fix(), not chore()'
+        - commit: 'chore(Config): Update .eslint.json file'
+          explanation: 'Mentions file name instead of describing what configuration changed'
 
   - name: infra
     description: Infrastructure-related changes (e.g., CI/CD, Cloud)
     requires_scope: true
-    scopes: [ CI, CD, IaC ]
+    scopes: [CI, CD, IaC]
     examples:
-      - "infra(CI): Validate PR title before merging"
+      - 'infra(CI): Validate PR title before merging'
 
   - name: docs
     description: Documentation updates
     requires_scope: true
     scopes:
       README:
-        description: "Main project documentation"
+        description: 'Main project documentation'
       Contribution:
-        description: "Contribution guidelines"
+        description: 'Contribution guidelines'
       API:
-        description: "API documentation and specifications"
+        description: 'API documentation and specifications'
       JSDoc:
-        description: "Inline code documentation"
+        description: 'Inline code documentation'
     examples:
-      - "docs(README): Clarify installation steps"
-      - "docs(Contribution): Add guideline for @example usage in utility functions"
-      - "docs(API): Document setupSwagger with example usage"
-      - "docs(JSDoc): Add usage sample for toMarkdownList"
-      - "docs(JSDoc): Add param and example tags to bootstrap function"
+      - 'docs(README): Clarify installation steps'
+      - 'docs(Contribution): Add guideline for @example usage in utility functions'
+      - 'docs(API): Document setupSwagger with example usage'
+      - 'docs(JSDoc): Add usage sample for toMarkdownList'
+      - 'docs(JSDoc): Add param and example tags to bootstrap function'
 
   - name: test
     description: Add or update tests
     requires_scope: true
-    scopes: [ Unit, Integration, E2E, Benchmark ]
+    scopes: [Unit, Integration, E2E, Benchmark]
     examples:
-      - "test(Unit): Add tests for validation service"
-      - "test(Integration): Verify payment flow between modules"
-      - "test(E2E): Add login scenario for user session"
-      - "test(Benchmark): Compare ConfigService performance with and without cache"
+      - 'test(Unit): Add tests for validation service'
+      - 'test(Integration): Verify payment flow between modules'
+      - 'test(E2E): Add login scenario for user session'
+      - 'test(Benchmark): Compare ConfigService performance with and without cache'
 
   - name: style
     description: Code style changes (e.g., formatting, linting)
     requires_scope: false
-    scopes: [ ]
+    scopes: []
     examples:
-      - "style: Apply Prettier auto-formatting"
+      - 'style: Apply Prettier auto-formatting'
 
   - name: revert
     description: Revert a previous commit
     requires_scope: false
-    scopes: [ ]
+    scopes: []
     examples:
       - "revert: 'fix(Database): Resolve connection timeout issue'"
 
   - name: remove
     description: Remove deprecated or unnecessary code, files, or features.
     requires_scope: true
-    scopes: [ Code, Files, Feature ]
+    scopes: [Code, Files, Feature]
     examples:
-      - "remove(Code): Delete obsolete authentication module"
+      - 'remove(Code): Delete obsolete authentication module'
 
 breaking_changes:
-  indicators: ["!", "BREAKING CHANGE:"]
+  indicators: ['!', 'BREAKING CHANGE:']
   examples:
-    - "feat(API)!: Foo bar"
+    - 'feat(API)!: Foo bar'
     - "feat(API): Add user roles\n\nBREAKING CHANGE: removes support for legacy admin flag"
