@@ -94,7 +94,7 @@ function loadConfig(configPath: string = './commit-conventions.yaml'): CommitCon
 function validateCommitMessage(message: string, config: CommitConfig): ValidationResult {
 	const errors: string[] = []
 	// @ts-ignore - suppresses the next line
-	const commitRegex = /^(?<type>[a-z]+)(\((?<scope>[^)]+)\))?: [A-Z](?<description>.+)$/
+	const commitRegex = /^(?<type>[a-z]+)(\((?<scope>[^)]+)\))?: (?<description>.+)$/
 	const match = message.match(commitRegex)
 
 	if (!match) {
