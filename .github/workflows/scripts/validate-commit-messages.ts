@@ -31,7 +31,7 @@ if (!baseSha || !headSha) {
 console.log(`Validating commits in PR #${prNumber}`)
 console.log(`Base ${baseSha.substring(0, 7)}, Head: ${headSha.substring(0, 7)}`)
 
-const commits = execSync(`git log --format="%H\%s|%an" ${baseSha}..${headSha}`)
+const commits = execSync(`git log --format="%H|%s|%an" ${baseSha}..${headSha}`)
 	.toString()
 	.trim()
 	.split('\n')
