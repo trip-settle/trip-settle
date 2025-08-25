@@ -42,6 +42,8 @@ jobs:
 
           # Get all changed files, excluding empty lines
           mapfile -t files < <(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | sed '/^$/d')
+          
+          root_config_changed=false
 
           echo "Files changed: ${#files[@]}"
 
@@ -58,7 +60,6 @@ jobs:
 
           # Get actual workspace names from packages directory
           changed_workspaces=()
-          root_config_changed=false
 
           # Check if root workspace config files changed
           for file in "${files[@]}"; do
@@ -135,3 +136,29 @@ jobs:
       - name: Todo - implement validation
         run: |
           echo "Add checks here (e.g., title convention, required labels, file ownership, etc.)"
+
+  validate-commit-messages:
+    runs-on: ubuntu-latest
+    name: Validate Commit Messages
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install yaml
+
+      - name: Validate PR commit messages
+        run: node ./.github/workflows/scripts/validate-commit-messages.ts
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}

@@ -1,0 +1,184 @@
+import { execSync } from 'node:child_process'
+import { readFileSync, writeFileSync } from 'fs'
+import { parse } from 'yaml'
+
+interface CommitRule {
+	name: string
+	description: string
+	requires_scope: boolean
+	scopes?: string[] | Record<string, { description: string }>
+	examples?: {
+		good?: Array<{ commit: string; explanation: string }>
+		bad?: Array<{ commit: string; explanation: string }>
+	}
+}
+
+interface CommitConfig {
+	allowed_keywords: CommitRule[]
+	breaking_changes: {
+		indicators: string[]
+		example: string[]
+	}
+}
+
+const { BASE_SHA: baseSha, HEAD_SHA: headSha, PR_NUMBER: prNumber } = process.env
+
+if (!baseSha || !headSha) {
+	console.error(`BASE_SHA or HEAD_SHA is not set. Got BASE_SHA=${baseSha}, HEAD_SHA=${headSha}`)
+	process.exit(2)
+}
+
+console.log(`Validating commits in PR #${prNumber}`)
+console.log(`Base ${baseSha.substring(0, 7)}, Head: ${headSha.substring(0, 7)}`)
+
+const commits = execSync(`git log --format="%H|%s|%an" ${baseSha}..${headSha}`)
+	.toString()
+	.trim()
+	.split('\n')
+	.filter(line => line.length > 0)
+
+if (commits.length === 0) {
+	console.log('No commits to validate')
+	process.exit(0)
+}
+
+console.log(`Found ${commits.length} commits to validate.`)
+
+let hasErrors = false
+const errors: string[] = []
+const validCommits: string[] = []
+let invalidCommitCount = 0
+
+const config = loadConfig()
+
+for (const commit of commits) {
+	const [sha, message, author] = commit.split('|', 3)
+
+	const validation = validateCommitMessage(message, config)
+
+	if (!validation.isValid) {
+		const shortSha = sha.substring(0, 7)
+		console.error(`❌ ${shortSha}: "${message}" by ${author}`)
+		validation.errors.forEach(error => {
+			console.error(`   - ${error}`)
+			errors.push(`${shortSha}: ${error}`)
+		})
+		hasErrors = true
+		invalidCommitCount++
+	} else {
+		const shortSha = sha.substring(0, 7)
+		validCommits.push(`${shortSha}: ${message}`)
+		console.log(`✅ ${shortSha}: "${message}"`)
+	}
+}
+
+generateJobSummary(commits.length, commits, errors, hasErrors)
+
+if (hasErrors) {
+	console.log('\n📋 Summary of errors:')
+	errors.forEach(error => console.log(`- ${error}`))
+
+	process.exit(1)
+}
+
+console.log(`\n🎉 All ${commits.length} commits have valid messages!`)
+
+interface ValidationResult {
+	isValid: boolean
+	errors: string[]
+}
+
+function loadConfig(configPath: string = './commit-conventions.yaml'): CommitConfig {
+	try {
+		const yamlContent = readFileSync(configPath, 'utf8')
+		return parse(yamlContent) as CommitConfig
+	} catch (error) {
+		console.error(`❌ Failed to load config file: ${error}`)
+		process.exit(1)
+	}
+}
+
+function validateCommitMessage(message: string, config: CommitConfig): ValidationResult {
+	const errors: string[] = []
+	// @ts-ignore - suppresses the next line
+	const commitRegex = /^(?<type>[a-z]+)(\((?<scope>[^)]+)\))?: (?<description>.+)$/
+	const match = message.match(commitRegex)
+
+	if (!match) {
+		errors.push('Invalid format. Expected: "<type>(<scope>): <description>"')
+		return { isValid: false, errors }
+	}
+
+	const { type, scope, description } = match.groups!
+
+	// Check if type is allowed
+	const allowedRule = config.allowed_keywords.find(rule => rule.name === type)
+	if (!allowedRule) {
+		const allowedTypes = config.allowed_keywords.map(rule => rule.name).join(', ')
+		errors.push(`Invalid type '${type}'. Allowed types: ${allowedTypes}`)
+		return { isValid: false, errors }
+	}
+
+	// Check scope requirement
+	if (allowedRule.requires_scope && !scope) {
+		errors.push(`Type '${type}' requires a scope`)
+	}
+
+	// Check if scope is valid (if provided and rule has defined scopes)
+	if (scope && allowedRule.scopes) {
+		let validScopes: string[] = []
+
+		// Todo Scope 가 배열에서 키로 모두 바뀌면 수정
+		if (Array.isArray(allowedRule.scopes)) {
+			validScopes = allowedRule.scopes
+		} else {
+			validScopes = Object.keys(allowedRule.scopes)
+		}
+
+		if (validScopes.length > 0 && !validScopes.includes(scope)) {
+			errors.push(`Invalid scope '${scope}' for type '${type}'. Allowed scopes: ${validScopes.join(', ')}`)
+		}
+	}
+
+	// Check if description starts with a capital letter
+	if (description && !/^[A-Z]/.test(description.trim())) {
+		errors.push('Description must start with a capital letter')
+	}
+
+	return {
+		isValid: errors.length === 0,
+		errors,
+	}
+}
+
+function generateJobSummary(totalCommits: number, validCommits: string[], errors: string[], hasErrors: boolean) {
+	let summary = `#  Commit Message Validation Results\n\n`
+	summary += `**Total commits:** ${totalCommits}\n`
+	summary += `**Valid commits:** ${validCommits.length}\n`
+	summary += `**Invalid commits:** ${errors.length}\n\n`
+
+	if (hasErrors) {
+		summary += `## ❌ Validation Errors\n\n`
+		errors.forEach(error => {
+			summary += `- ${error}\n`
+		})
+		summary += `\n`
+	}
+
+	if (validCommits.length > 0) {
+		summary += `## ✅ Valid Commits\n\n`
+		validCommits.forEach(commit => {
+			summary += `- ${commit}\n`
+		})
+		summary += `\n`
+	}
+
+	if (hasErrors) {
+		summary += `##  Commit Message Format\n\n`
+		summary += `Expected format: \`<type>(<scope>): <description>\`\n\n`
+		summary += `**Allowed types:** ${config.allowed_keywords.map(rule => rule.name).join(', ')}\n`
+	}
+
+	// Write to GitHub Actions summary
+	writeFileSync(process.env.GITHUB_STEP_SUMMARY || '/dev/null', summary)
+}
