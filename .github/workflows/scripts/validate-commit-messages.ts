@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { readFileSync } from 'fs'
+import { readFileSync, writeFileSync } from 'fs'
 import { parse } from 'yaml'
 
 interface CommitRule {
@@ -66,6 +66,8 @@ for (const commit of commits) {
 		console.log(`✅ ${sha.substring(0, 7)}: "${message}"`)
 	}
 }
+
+generateJobSummary(commits.length, commits, errors, hasErrors)
 
 if (hasErrors) {
 	console.log('\n📋 Summary of errors:')
@@ -142,4 +144,36 @@ function validateCommitMessage(message: string, config: CommitConfig): Validatio
 		isValid: errors.length === 0,
 		errors,
 	}
+}
+
+function generateJobSummary(totalCommits: number, validCommits: string[], errors: string[], hasErrors: boolean) {
+	let summary = `#  Commit Message Validation Results\n\n`
+	summary += `**Total commits:** ${totalCommits}\n`
+	summary += `**Valid commits:** ${validCommits.length}\n`
+	summary += `**Invalid commits:** ${errors.length}\n\n`
+
+	if (hasErrors) {
+		summary += `## ❌ Validation Errors\n\n`
+		errors.forEach(error => {
+			summary += `- ${error}\n`
+		})
+		summary += `\n`
+	}
+
+	if (validCommits.length > 0) {
+		summary += `## ✅ Valid Commits\n\n`
+		validCommits.forEach(commit => {
+			summary += `- ${commit}\n`
+		})
+		summary += `\n`
+	}
+
+	if (hasErrors) {
+		summary += `##  Commit Message Format\n\n`
+		summary += `Expected format: \`<type>(<scope>): <description>\`\n\n`
+		summary += `**Allowed types:** ${config.allowed_keywords.map(rule => rule.name).join(', ')}\n`
+	}
+
+	// Write to GitHub Actions summary
+	writeFileSync(process.env.GITHUB_STEP_SUMMARY || '/dev/null', summary)
 }
