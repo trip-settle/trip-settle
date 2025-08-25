@@ -46,6 +46,8 @@ console.log(`Found ${commits.length} commits to validate.`)
 
 let hasErrors = false
 const errors: string[] = []
+const validCommits: string[] = []
+let invalidCommitCount = 0
 
 const config = loadConfig()
 
@@ -62,8 +64,11 @@ for (const commit of commits) {
 			errors.push(`${shortSha}: ${error}`)
 		})
 		hasErrors = true
+		invalidCommitCount++
 	} else {
-		console.log(`✅ ${sha.substring(0, 7)}: "${message}"`)
+		const shortSha = sha.substring(0, 7)
+		validCommits.push(`${shortSha}: ${message}`)
+		console.log(`✅ ${shortSha}: "${message}"`)
 	}
 }
 
