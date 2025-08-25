@@ -9,6 +9,12 @@ allowed_keywords:
         description: 'Configuration file changes'
       Database:
         description: 'Database schema, queries, or connection changes'
+      UI:
+        description: 'HTML templates and CSS styling changes'
+        examples:
+          good:
+            - commit: 'feat(UI): Add new login page'
+              explanation: 'Clear feature addition with specific scope'
     examples:
       good:
         - commit: 'feat(Config): Add dynamic environment variable loading'
