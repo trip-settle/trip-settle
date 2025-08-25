@@ -133,6 +133,11 @@ function validateCommitMessage(message: string, config: CommitConfig): Validatio
 		}
 	}
 
+	// Check if description starts with a capital letter
+	if (description && !/^[A-Z]/.test(description.trim())) {
+		errors.push('Description must start with a capital letter')
+	}
+
 	return {
 		isValid: errors.length === 0,
 		errors,
