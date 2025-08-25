@@ -81,7 +81,7 @@ interface ValidationResult {
 	errors: string[]
 }
 
-function loadConfig(configPath: string = './commit-convetions.yaml'): CommitConfig {
+function loadConfig(configPath: string = './commit-conventions.yaml'): CommitConfig {
 	try {
 		const yamlContent = readFileSync(configPath, 'utf8')
 		return parse(yamlContent) as CommitConfig
