@@ -92,7 +92,8 @@ function loadConfig(configPath: string = './commit-conventions.yaml'): CommitCon
 }
 
 function validateCommitMessage(message: string, config: CommitConfig): ValidationResult {
-	const commitRegex = /^([a-z]+)(\(([^)]+)\))?: [A-Z].+$/
+	// @ts-ignore - suppresses the next line
+	const commitRegex = /^(?<type>[a-z]+)(\((?<scope>[^)]+)\))?: [A-Z](?<description>.+)$/
 	const match = message.match(commitRegex)
 
 	if (!match) {
@@ -100,7 +101,7 @@ function validateCommitMessage(message: string, config: CommitConfig): Validatio
 		return { isValid: false, errors }
 	}
 
-	const [, type, , scope, description] = match
+	const { type, scope, description } = match.groups!
 
 	// Check if type is allowed
 	const allowedRule = config.allowed_keywords.find(rule => rule.name === type)
