@@ -9,6 +9,10 @@
     "url": "git+https://github.com/trip-settle/trip-settle.git"
   },
   "private": true,
+  "scripts": {
+    "test": "vitest",
+    "test:ui": "vitest --ui"
+  },
   "devDependencies": {
     "@types/node": "^24.3.0",
     "@vitest/ui": "^3.2.4",
