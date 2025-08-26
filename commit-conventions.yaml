@@ -28,7 +28,13 @@ allowed_keywords:
   - name: fix
     description: Fix a bug.
     requires_scope: true
-    scopes: [Database, Code]
+    scopes:
+      Typo:
+        description: 'Fix typos in comments, documentation, or code'
+        examples:
+          good:
+            - commit: 'fix(Typo): Correct misspellings in user documentation'
+              explanation: 'Clear typo fix with specific scope'
     examples:
       good:
         - commit: 'fix(Database): Resolve connection timeout issue'
