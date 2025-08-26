@@ -49,20 +49,26 @@ allowed_keywords:
     description: Improve existing code without changing functionality.
     requires_scope: true
     scopes:
-      - Performance # For changes that optimize speed or resource usage.
-      - Modularity # For changes that improve structure/separation of concerns.
-      - Readability # When refactoring to improve clarity.
-      - Maintainability # For improvements that simplify future maintenance.
-    examples:
-      good:
-        - commit: 'refactor(Performance): Remove unnecessary validation logic'
-          explanation: 'Clear performance improvement without functionality change'
-        - commit: 'refactor(Maintainability): Introduce FindDockerfilesDto to clarify the read response structure'
-      bad:
-        - commit: 'refactor(Performance): Update database.service.ts'
-          explanation: 'Mentions file name instead of describing performance improvement'
-        - commit: 'refactor(Modularity): Add new payment feature'
-          explanation: 'Adding new feature should be feat(), not refactor()'
+      Performance:
+        description: For changes that optimize speed or resource usage.
+        examples:
+          good:
+            - commit: 'refactor(Performance): Remove unnecessary validation logic'
+              explanation: 'Clear performance improvement without functionality change'
+      Modularity:
+        description: For changes that improve structure/separation of concerns.
+        examples:
+          bad:
+            - commit: 'refactor(Modularity): Add new payment feature'
+              explanation: 'Adding new feature should be feat(), not refactor()'
+      Readability:
+        description: When refactoring to improve clarity.
+      Maintainability:
+        description: For improvements that simplify future maintenance.
+        examples:
+          good:
+            - commit: 'refactor(Maintainability): Introduce FindDockerfilesDto to clarify the read response structure'
+              explanation: 'Clear improvement without functionality change'
 
   - name: chore
     description: General maintenance tasks (e.g., dependencies, configs)
