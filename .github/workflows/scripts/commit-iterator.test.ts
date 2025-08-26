@@ -39,5 +39,16 @@ describe('CommitIterator', () => {
 			expect(commits[0].sha).toBe('sha1')
 			expect(commits[1].sha).toBe('sha2')
 		})
+
+		it('should handle commits with pipe characters in message or author', () => {
+			const mockGitOutput = 'sha1|feat: Add feature | with pipe|John | Doe'
+			mockExecSync.mockReturnValue(Buffer.from(mockGitOutput))
+
+			const range: CommitRange = { baseSha: 'base123', headSha: 'def456' }
+			const iterator = new CommitIterator(range)
+			const commits = iterator.getCommits()
+
+			expect(commits).toEqual([{ sha: 'sha1', message: 'feat: Add feature | with pipe', author: 'John | Doe' }])
+		})
 	})
 })
