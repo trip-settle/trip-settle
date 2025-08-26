@@ -26,5 +26,18 @@ describe('CommitIterator', () => {
 			const iterator = new CommitIterator(range)
 			const commits = iterator.getCommits()
 		})
+
+		it('should filter out empty lines', () => {
+			const mockGitOutput = 'sha1|feat: Add new feature|John Doe\n\nsha2|fix: Fix bug|Jane Smith\n\n'
+			mockExecSync.mockReturnValue(Buffer.from(mockGitOutput))
+
+			const range: CommitRange = { baseSha: 'base123', headSha: 'def456' }
+			const iterator = new CommitIterator(range)
+			const commits = iterator.getCommits()
+
+			expect(commits).toHaveLength(2)
+			expect(commits[0].sha).toBe('sha1')
+			expect(commits[1].sha).toBe('sha2')
+		})
 	})
 })
