@@ -9,6 +9,12 @@ allowed_keywords:
         description: 'Configuration file changes'
       Database:
         description: 'Database schema, queries, or connection changes'
+      UI:
+        description: 'HTML templates and CSS styling changes'
+        examples:
+          good:
+            - commit: 'feat(UI): Add new login page'
+              explanation: 'Clear feature addition with specific scope'
     examples:
       good:
         - commit: 'feat(Config): Add dynamic environment variable loading'
@@ -22,7 +28,13 @@ allowed_keywords:
   - name: fix
     description: Fix a bug.
     requires_scope: true
-    scopes: [Database, Code]
+    scopes:
+      Typo:
+        description: 'Fix typos in comments, documentation, or code'
+        examples:
+          good:
+            - commit: 'fix(Typo): Correct misspellings in user documentation'
+              explanation: 'Clear typo fix with specific scope'
     examples:
       good:
         - commit: 'fix(Database): Resolve connection timeout issue'
