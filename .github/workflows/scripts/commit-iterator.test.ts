@@ -25,6 +25,10 @@ describe('CommitIterator', () => {
 			const range: CommitRange = { baseSha: 'base123', headSha: 'def456' }
 			const iterator = new CommitIterator(range)
 			const commits = iterator.getCommits()
+			expect(commits).toEqual([
+				{ sha: 'sha1', message: 'feat: Add new feature', author: 'John Doe' },
+				{ sha: 'sha2', message: 'fix: Fix bug', author: 'Jane Smith' },
+			])
 		})
 
 		it('should filter out empty lines', () => {
